@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1677399930 source:f:\addressbook\main.cpp
+	<iostream>
+	<vector>
+
