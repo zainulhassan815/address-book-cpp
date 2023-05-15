@@ -1,12 +1,58 @@
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 using namespace std;
+const string db_file_name = "contacts.txt";
+
+/*
+A structure representing Contact model
+*/
+struct Contact
+{
+	string name;
+	string email;
+	string phone;
+};
 
 /*
 This array is used to store all the contacts.
 */
-vector<vector<string>> contacts;
+vector<Contact> contact_list;
+
+/*
+Load all contacts from database (Text File)
+*/
+void load_all_contacts()
+{
+	ifstream db;
+	db.open(db_file_name);
+
+	if (db) {
+		while(!db.eof())
+		{
+			Contact contact;
+			db >> contact.name >> contact.email >> contact.phone;
+			contact_list.push_back(contact);
+		}
+	}
+
+	db.close();
+}
+
+/*
+Sync all contacts from contact list to database (Text File)
+*/
+void sync_all_contacts()
+{
+    ofstream db(db_file_name);
+    for (int i = 0; i < contact_list.size(); i++)
+    {
+        Contact contact = contact_list[i];
+        db << contact.name << " " << contact.email << " " << contact.phone << endl;
+    }
+    db.close();
+}
 
 /*
 Show all contacts. This function uses a for loop starting from 0 to the size of data.
@@ -15,8 +61,11 @@ It then prints each contact stored in the data.
 void show_all_contacts()
 {
     cout << "All contacts:" << endl;
-    for (int i = 0; i < contacts.size(); i++)
-        cout << i + 1 << ". " << contacts[i][0] << " : " << contacts[i][1] << endl;
+    for (int i = 0; i < contact_list.size(); i++)
+	{
+		Contact contact = contact_list[i];
+		cout << i + 1 << ". " << contact.name << " " << contact.email << " " << contact.phone << endl;
+	}
 }
 
 /*
@@ -25,14 +74,17 @@ then adds the contact to the data.
 */
 void save_contact()
 {
+    Contact contact;
     string name, phone;
     cout << "Enter details to save:" << endl;
     cout << "name: ";
-    cin >> name;
+    cin >> contact.name;
+    cout << "email: ";
+    cin >> contact.email;
     cout << "phone: ";
-    cin >> phone;
-    vector<string> data = {name, phone};
-    contacts.push_back(data);
+    cin >> contact.phone;
+    contact_list.push_back(contact);
+    sync_all_contacts();
     cout << "Contact saved successfully." << endl;
 }
 
@@ -48,15 +100,16 @@ void edit_contact() {
     --index;
 
     cout << endl;
-    string name, phone;
+    Contact contact = contact_list[index];
     cout << "Enter details to save:" << endl;
     cout << "name: ";
-    cin >> name;
+    cin >> contact.name;
+    cout << "email: ";
+    cin >> contact.email;
     cout << "phone: ";
-    cin >> phone;
-
-    vector<string> data = {name, phone};
-    contacts[index] = data;
+    cin >> contact.phone;
+    contact_list[index] = contact;
+    sync_all_contacts();
     cout << "Successfully changed contact." << endl;
 }
 
@@ -70,7 +123,8 @@ void delete_contact() {
     cout << "Serial Number: ";
     cin >> index;
     --index;
-    contacts.erase(contacts.begin() + index);
+    contact_list.erase(contact_list.begin() + index);
+    sync_all_contacts();
     cout << "Successfully delete contact." << endl;
 }
 
@@ -98,6 +152,7 @@ void print_menu()
 int main()
 {
     greet();
+    load_all_contacts();
 
     while(true)
     {
